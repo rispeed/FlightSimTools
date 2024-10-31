@@ -4,23 +4,18 @@ import requests
 import xml.etree.ElementTree as ET
 import os
 import math
-import subprocess
 import json
-
 import json
 import socket
 import struct
 import binascii
 from time import sleep
 import platform
-
-import sys
 import socket
 import struct
 import binascii
 from time import sleep
 import platform
-import time
 
 
 
@@ -253,21 +248,10 @@ class XPlaneUdp:
 
 
 
+# Constants
 DATAREF_FUEL1 = "abus/CL650/ARINC429/FDCU-1/words/FSCU/0/FQTY_MN_L"
 DATAREF_FUEL2 = "abus/CL650/ARINC429/FDCU-1/words/FSCU/0/FQTY_MN_R"
 DATAREF_FUEL3 = "abus/CL650/ARINC429/FDCU-1/words/FSCU/0/FQTY_AUX"
-
-
-
-
-
-
-
-
-
-
-
-# Constants
 SIMBRIEF_API_URL = "https://www.simbrief.com/api/xml.fetcher.php?username={}"
 SIMBRIEF_USERNAME = "rgralinski"
 OUT_DIR = "out"
@@ -386,13 +370,26 @@ def calculate_difference():
         # Update the labels
         difference_var.set(f"{difference:.2f} {fuel_required_unit.upper()}")
         amount_needed_var.set(f"{amount_needed:.2f} {fuel_unit.capitalize()}")
+         # Update the progress bar value
+        progress = (fuel_on_board / fuel_required) * 100 if fuel_required > 0 else 0
+        progress_var.set(progress)
+        
     except ValueError:
         difference_var.set("Error")
         amount_needed_var.set("Error")
+        progress_var.set(0)
 
 # Function to update the GUI in real-time
 def update_gui(*args):
     calculate_difference()
+
+
+def update_fuel_on_board():
+    fuel_on_board = fetch_initial_fuel()
+    fuel_on_board_var.set(fuel_on_board)
+    calculate_difference()
+    # Schedule the function to run again after 3000 milliseconds (3 seconds)
+    root.after(500, update_fuel_on_board)
 
 # Initialize the GUI
 root = tk.Tk()
@@ -406,6 +403,10 @@ density_unit_var = tk.StringVar()
 fuel_required_unit_var = tk.StringVar()
 difference_var = tk.StringVar()
 amount_needed_var = tk.StringVar()
+
+progress_var = tk.DoubleVar()
+progress_bar = ttk.Progressbar(root, variable=progress_var, maximum=100)
+progress_bar.grid(column=0, row=6, columnspan=2, padx=10, pady=5, sticky='ew')
 
 # Fetch initial values
 fuel_required, default_unit = fetch_fuel_required(SIMBRIEF_USERNAME)
@@ -454,8 +455,11 @@ fuel_unit_var.trace_add('write', update_gui)
 density_unit_var.trace_add('write', update_gui)
 fuel_required_unit_var.trace_add('write', update_gui)
 
+
 # Perform initial calculation
 calculate_difference()
 
+# Start the periodic update of fuel on board
+update_fuel_on_board()
 # Start the GUI event loop
 root.mainloop()
