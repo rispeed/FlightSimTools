@@ -1,0 +1,89 @@
+import tkinter as tk
+from tkinter import ttk
+
+def update_fields(event=None):
+    try:
+        density = float(density_var.get())
+        if density_unit.get() == 'kg/lt':
+            kg = float(kg_var.get())
+            lt = kg / density
+            us_gal = lt * 0.264172
+            imp_gal = lt * 0.219969
+            lbs = kg * 2.20462
+            metric_ton = kg / 1000
+        else:
+            lbs = float(lbs_var.get())
+            us_gal = lbs / density
+            lt = us_gal / 0.264172
+            imp_gal = us_gal * 0.832674
+            kg = lbs / 2.20462
+            metric_ton = kg / 1000
+
+        lt_var.set(f"{lt:.2f}")
+        us_gal_var.set(f"{us_gal:.2f}")
+        imp_gal_var.set(f"{imp_gal:.2f}")
+        kg_var.set(f"{kg:.2f}")
+        metric_ton_var.set(f"{metric_ton:.2f}")
+    except ValueError:
+        pass
+
+def set_default_density():
+    if density_unit.get() == 'kg/lt':
+        density_var.set("0.8")
+    else:
+        density_var.set("6.7")
+    update_fields()
+
+root = tk.Tk()
+root.title("Fuel Unit and Weight Converter")
+
+font = ("Arial", 14)
+
+density_unit = tk.StringVar(value='kg/lt')
+density_var = tk.StringVar(value="0.8")
+kg_var = tk.StringVar(value="0")
+lt_var = tk.StringVar(value="0")
+us_gal_var = tk.StringVar(value="0")
+imp_gal_var = tk.StringVar(value="0")
+lbs_var = tk.StringVar(value="0")
+metric_ton_var = tk.StringVar(value="0")
+
+tk.Label(root, text="Density", font=font).grid(row=0, column=0, padx=10, pady=10)
+density_entry = tk.Entry(root, textvariable=density_var, font=font)
+density_entry.grid(row=0, column=1, padx=10, pady=10)
+density_entry.bind("<KeyRelease>", update_fields)
+
+tk.Radiobutton(root, text="kg/lt", variable=density_unit, value='kg/lt', command=set_default_density, font=font).grid(row=0, column=2, padx=10, pady=10)
+tk.Radiobutton(root, text="lbs/gal", variable=density_unit, value='lbs/gal', command=set_default_density, font=font).grid(row=0, column=3, padx=10, pady=10)
+
+tk.Label(root, text="Kilograms", font=font).grid(row=1, column=0, padx=10, pady=10)
+kg_entry = tk.Entry(root, textvariable=kg_var, font=font)
+kg_entry.grid(row=1, column=1, padx=10, pady=10)
+kg_entry.bind("<KeyRelease>", update_fields)
+
+tk.Label(root, text="Liters", font=font).grid(row=2, column=0, padx=10, pady=10)
+lt_entry = tk.Entry(root, textvariable=lt_var, font=font)
+lt_entry.grid(row=2, column=1, padx=10, pady=10)
+lt_entry.bind("<KeyRelease>", update_fields)
+
+tk.Label(root, text="US Gallons", font=font).grid(row=3, column=0, padx=10, pady=10)
+us_gal_entry = tk.Entry(root, textvariable=us_gal_var, font=font)
+us_gal_entry.grid(row=3, column=1, padx=10, pady=10)
+us_gal_entry.bind("<KeyRelease>", update_fields)
+
+tk.Label(root, text="Imperial Gallons", font=font).grid(row=4, column=0, padx=10, pady=10)
+imp_gal_entry = tk.Entry(root, textvariable=imp_gal_var, font=font)
+imp_gal_entry.grid(row=4, column=1, padx=10, pady=10)
+imp_gal_entry.bind("<KeyRelease>", update_fields)
+
+tk.Label(root, text="Pounds", font=font).grid(row=5, column=0, padx=10, pady=10)
+lbs_entry = tk.Entry(root, textvariable=lbs_var, font=font)
+lbs_entry.grid(row=5, column=1, padx=10, pady=10)
+lbs_entry.bind("<KeyRelease>", update_fields)
+
+tk.Label(root, text="Metric Tons", font=font).grid(row=6, column=0, padx=10, pady=10)
+metric_ton_entry = tk.Entry(root, textvariable=metric_ton_var, font=font)
+metric_ton_entry.grid(row=6, column=1, padx=10, pady=10)
+metric_ton_entry.bind("<KeyRelease>", update_fields)
+
+root.mainloop()
