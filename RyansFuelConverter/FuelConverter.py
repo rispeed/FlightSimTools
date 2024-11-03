@@ -10,8 +10,21 @@ import requests
 import xml.etree.ElementTree as ET
 import math
 
-# SimBrief username
-simbrief_username = 'rgralinski'
+# Function to read SimBrief username from config file
+def read_simbrief_username():
+    try:
+        with open('config.txt', 'r') as file:
+            return file.readline().strip()
+    except FileNotFoundError:
+        return 'rgralinski'  # Default username if config file is not found
+
+# Function to write SimBrief username to config file
+def write_simbrief_username(username):
+    with open('config.txt', 'w') as file:
+        file.write(username)
+
+# Read SimBrief username from config file
+simbrief_username = read_simbrief_username()
 
 def fetch_simbrief_block_fuel(username):
     try:
@@ -23,7 +36,7 @@ def fetch_simbrief_block_fuel(username):
         return rounded_fuel
     except Exception as e:
         print(f"Error fetching SimBrief block fuel: {e}", file=sys.stderr)
-        return 1000  # Default value if fetching fails
+        return -1  # Default value if fetching fails
 
 def fuel_on_board():
     return 0
@@ -102,15 +115,21 @@ def update_fuel_on_board():
         except Exception as e:
             print(f"Error running {script_path}: {e}", file=sys.stderr)
         
-        time.sleep(0.5)  # Wait for 1 second before running the script again
+        time.sleep(1)  # Wait for 1 second before running the script again
 
 def start_fuel_on_board_thread():
     fuel_thread = threading.Thread(target=update_fuel_on_board, name="FuelOnBoardThread", daemon=True)
     fuel_thread.start()
 
+def save_config():
+    global simbrief_username
+    simbrief_username = simbrief_username_var.get()
+    write_simbrief_username(simbrief_username)
+    fuel_required_var.set(fuel_required())
+
 root = tk.Tk()
 root.title("Fuel Calculator")
-root.geometry("600x500")
+root.geometry("600x600")
 
 font_large = ("Arial", 16)
 font_red = ("Arial", 16, "bold")
@@ -126,10 +145,19 @@ density_var = tk.StringVar(value=0.8)
 unit_var = tk.StringVar(value="KG")
 density_unit = tk.StringVar(value="kg/lt")
 output_unit = tk.StringVar(value="liters")
+simbrief_username_var = tk.StringVar(value=simbrief_username)
+
+# Config section
+config_frame = ttk.LabelFrame(root, text="Config")
+config_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+
+tk.Label(config_frame, text="SimBrief Username:", font=font_large).grid(row=0, column=0, sticky="e", padx=10, pady=10)
+tk.Entry(config_frame, textvariable=simbrief_username_var, font=font_large).grid(row=0, column=1, padx=10, pady=10)
+tk.Button(config_frame, text="Save", command=save_config, font=font_large).grid(row=0, column=2, padx=10, pady=10)
 
 # Aircraft section
 aircraft_frame = ttk.LabelFrame(root, text="Aircraft")
-aircraft_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+aircraft_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
 
 tk.Label(aircraft_frame, text="Fuel On Board:", font=font_large).grid(row=0, column=0, sticky="e", padx=10, pady=10)
 tk.Entry(aircraft_frame, textvariable=fuel_on_board_var, font=font_large).grid(row=0, column=1, padx=10, pady=10)
@@ -143,7 +171,7 @@ ttk.Radiobutton(aircraft_frame, text="LBS", variable=unit_var, value="LBS", comm
 
 # Refuel section
 refuel_frame = ttk.LabelFrame(root, text="Refuel")
-refuel_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+refuel_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
 
 tk.Label(refuel_frame, text="Density:", font=font_large).grid(row=0, column=0, sticky="e", padx=10, pady=10)
 tk.Entry(refuel_frame, textvariable=density_var, font=font_large).grid(row=0, column=1, padx=10, pady=10)
