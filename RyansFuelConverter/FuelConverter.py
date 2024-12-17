@@ -128,7 +128,8 @@ def save_config():
     fuel_required_var.set(fuel_required())
 
 root = tk.Tk()
-root.title("Fuel Calculator")
+root.title("Ryans Fuel Calculator")
+root.attributes("-topmost", True)  # This line makes the window stay on top
 root.geometry("600x600")
 
 font_large = ("Arial", 16)

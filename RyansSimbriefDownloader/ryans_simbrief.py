@@ -271,6 +271,7 @@ root.config(menu=mainmenu)
 
 
 root.title("Ryans Simbrief Downloader")
+root.attributes("-topmost", True)  # This line makes the window stay on top
 root.geometry("600x700")
 
 title_label = tk.Label(root, text="Ryans Simbrief Downloader", font=("Arial", 16, "bold"), pady=10)
